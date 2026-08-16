@@ -85,18 +85,12 @@ export default function App() {
     <div className="min-h-screen">
       {/* Dark masthead */}
       <header className="bg-nav">
-        <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-baseline gap-2.5 min-w-0">
-            <span className="bg-espn text-white text-[11px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm shrink-0">
-              TQFTS
-            </span>
-            <span className="text-white font-bold text-[15px] shrink-0">Draft Hub</span>
-            <span className="text-white/50 text-[12px] truncate hidden md:inline">{league?.name}</span>
-          </div>
-          <div className="text-[11px] text-white/60 text-right shrink-0 leading-tight">
-            <div className="font-semibold text-white/85">{CURRENT_SEASON} Offseason</div>
-            <div className="hidden sm:block">Keeper values from the 2025 draft</div>
-          </div>
+        <div className="max-w-6xl mx-auto px-5 h-14 flex items-baseline gap-2.5 min-w-0">
+          <span className="self-center bg-espn text-white text-[11px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm shrink-0">
+            TQFTS
+          </span>
+          <span className="self-center text-white font-bold text-[15px] shrink-0">Draft Hub</span>
+          <span className="self-center text-white/50 text-[12px] truncate hidden sm:inline">{league?.name}</span>
         </div>
       </header>
 
