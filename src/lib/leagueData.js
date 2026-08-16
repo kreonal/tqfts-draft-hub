@@ -9,21 +9,28 @@ const DRAFT_ROUNDS = 14;
 const DEFAULT_KEEPER_SLOTS = 2;
 
 /* ---------------------------------------------------------
-   MANAGERS — real names, keyed by ESPN team id.
-   Several ESPN accounts use joke names ("Wonder Bread", "Mat Pat"), so these
-   override whatever ESPN reports. Anything not listed falls back to the ESPN
-   account's first/last name.
+   MANAGERS — first names only, keyed by ESPN team id.
+   ESPN reports full names (and some joke handles like "Wonder Bread"), so
+   these override it everywhere the app shows an owner. All 16 teams are
+   mapped; the ESPN name is only a fallback if a team id ever changes.
 --------------------------------------------------------- */
 const MANAGERS = {
-  1: "Kendall",
-  3: "Shaun", // ESPN account says "Wonder Bread"
-  5: "Joey", // ESPN account says "Sabrina Gertz"
-  12: "Minh",
-  18: "Nick",
-  21: "Henry",
-  23: "Alfred",
-  24: "Karan",
-  // TODO: fill in the rest as you confirm them — 2, 7, 8, 13, 17, 19, 20, 22.
+  1: "Kendall", // Sophomore Season
+  2: "Matt", // The Fister — ESPN says "Mat Pat"
+  3: "Shaun", // HOLY BIBLE — ESPN says "Wonder Bread"
+  5: "Joey", // Stafford Infection — ESPN says "Sabrina Gertz"
+  7: "John", // My Tribal Chief
+  8: "Rohan", // Njigbas in Paris
+  12: "Minh", // Nine Lives
+  13: "Prashant", // Welcome to the Woodshed
+  17: "Anthony", // To Infinity and Bijan
+  18: "Nick", // Darnold Duck
+  19: "Calvin", // Son of GRACE
+  20: "Aaron", // The Nabers think im sellin dope
+  21: "Henry", // Bishop Sycamore 2.0
+  22: "Zack", // Smitty Werbenjagermanjensen
+  23: "Alfred", // abceedeeefghijklmnopqrstuvwxyz
+  24: "Karan", // STAY TUNED!
 };
 
 export function managerFor(espnTeamId, espnFallback) {
