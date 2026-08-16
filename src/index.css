@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink antialiased;
+    font-feature-settings: "tnum";
+  }
+
+  /* Native controls, toned down to match the flat ESPN look. */
+  select,
+  input {
+    @apply bg-white border border-line rounded text-ink;
+  }
+  select:focus,
+  input:focus {
+    @apply outline-none ring-1 ring-espn/40 border-espn/50;
+  }
+  select:disabled,
+  input:disabled {
+    @apply bg-hair text-faint cursor-not-allowed;
+  }
+}
+
+@layer components {
+  /* Small uppercase column/section label — the workhorse of ESPN's tables. */
+  .label {
+    @apply text-[10px] font-semibold uppercase tracking-wide text-sub;
+  }
+  .card {
+    @apply bg-white border border-line rounded shadow-card;
+  }
+  .cardhead {
+    @apply px-4 py-3 border-b border-hair;
+  }
+  /* Zebra striping on data tables. */
+  .zebra tbody tr:nth-child(even) {
+    @apply bg-row;
+  }
+}
