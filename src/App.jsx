@@ -147,8 +147,7 @@ export default function App() {
             <RuleBlock title="FAAB">Tradeable. Does not roll over between seasons.</RuleBlock>
             <RuleBlock title="Once the season starts">
               Only {NEXT_SEASON} picks stay tradeable (still no Rounds 1–2), and the keeper-slot
-              requirement on player trades goes away. Flip <code className="text-[12px] bg-hair px-1 py-0.5 rounded">TRADEABLE_YEARS</code> in{" "}
-              <code className="text-[12px] bg-hair px-1 py-0.5 rounded">src/lib/rules.js</code> when that happens.
+              requirement on player trades goes away.
             </RuleBlock>
           </div>
         )}

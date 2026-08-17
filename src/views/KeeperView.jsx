@@ -118,7 +118,7 @@ export default function KeeperView({ teams }) {
 
       <Section
         title="Submitted keepers"
-        subtitle="Confirmed keeper declarations for the 2026 draft. Record these in SUBMITTED_KEEPERS in src/lib/leagueData.js as owners lock them in."
+        subtitle="Keepers that owners have locked in for the 2026 draft."
         entries={filter(submitted)}
         tone="submitted"
         empty="No keepers submitted yet"
