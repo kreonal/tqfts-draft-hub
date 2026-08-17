@@ -28,8 +28,7 @@ picked up natively as a serverless function via the `/api` convention.
 - **Keepers** — league-wide list of ineligible players (kept in 2025) by
   manager, and confirmed keeper submissions once you record them.
 - **Draft Board** — the full 14-round snake board, columns in draft-order.
-  Traded picks are tinted and labelled "acquired from X", and the Highlight
-  selector dims everything except one manager's picks.
+  Traded picks are tinted and labelled "acquired from X".
 - **Trade Machine** *(hidden)* — build an N-team trade and check it against
   the bylaws.
 - **Bylaws** *(hidden)* — the plain-English rule reference.
