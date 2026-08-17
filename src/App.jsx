@@ -3,6 +3,7 @@ import { fetchLeague } from "./lib/espn";
 import { CURRENT_SEASON, NEXT_SEASON } from "./lib/rules";
 import TeamView from "./views/TeamView";
 import KeeperView from "./views/KeeperView";
+import DraftBoardView from "./views/DraftBoardView";
 import TradeView from "./views/TradeView";
 
 // `hidden` tabs stay fully wired below — they're just not linked in the nav.
@@ -10,6 +11,7 @@ import TradeView from "./views/TradeView";
 const TABS = [
   { id: "teams", label: "Teams" },
   { id: "keepers", label: "Keepers" },
+  { id: "board", label: "Draft Board" },
   { id: "trade", label: "Trade Machine", hidden: true },
   { id: "rules", label: "Bylaws", hidden: true },
 ];
@@ -118,6 +120,7 @@ export default function App() {
       <main className="max-w-6xl mx-auto px-5 py-6">
         {tab === "teams" && <TeamView teams={teams} teamByEspnId={teamByEspnId} />}
         {tab === "keepers" && <KeeperView teams={teams} />}
+        {tab === "board" && <DraftBoardView teams={teams} />}
         {tab === "trade" && <TradeView teams={teams} teamById={teamById} />}
         {tab === "rules" && (
           <div className="max-w-3xl space-y-3">

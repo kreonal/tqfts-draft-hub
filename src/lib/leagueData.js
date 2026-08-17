@@ -53,37 +53,110 @@ export function keeperSlotsFor(espnTeamId) {
 }
 
 /* ---------------------------------------------------------
-   DRAFT PICK INVENTORIES
-   A bare number is the team's own pick in that round; `from(round, teamId)`
-   marks a pick acquired from another team (shown in the UI as "from Nick").
-   Teams not listed hold a full, untraded R1–R14 slate.
+   DRAFT ORDER — 2026, first pick to last, by ESPN team id.
+   Matches ESPN's draftSettings.pickOrder as of the lottery.
 --------------------------------------------------------- */
-const from = (round, fromTeamId) => ({ round, fromTeamId });
+export const DRAFT_ORDER = [
+  24, //  1. Karan
+  7, //   2. John
+  20, //  3. Aaron
+  23, //  4. Alfred
+  3, //   5. Shaun
+  13, //  6. Prashant
+  22, //  7. Zack
+  2, //   8. Matt
+  19, //  9. Calvin
+  5, //  10. Joey
+  18, // 11. Nick
+  8, //  12. Rohan
+  21, // 13. Henry
+  12, // 14. Minh
+  17, // 15. Anthony
+  1, //  16. Kendall
+];
 
-const PICKS_2026 = {
-  1: [1, 2, 3, 5, 7, 8, from(8, 18), 9, from(9, 23), 10, 11, 12, 13, 14], // Kendall
-  5: [1, 2, 3, from(3, 21), 4, 5, 6, 8, 9, 10, 11, 12, 13, 14], // Joey
-  12: [1, 2, 3, 5, 7, 8, 9, from(9, 24), 10, 11, 12, 13, 14, from(14, 24)], // Minh
-  18: [1, 2, 6, from(6, 1), 7, from(7, 21), 9, 10, from(10, 24), from(10, 21), 11, 12, 13, 14], // Nick
-  21: [1, 2, from(3, 18), 4, 5, from(5, 18), 6, from(7, 5), 8, 9, 11, 12, 13, 14], // Henry
-  23: [1, 2, 3, 4, from(4, 1), 5, 6, 7, 8, 10, 11, 12, 13, 14], // Alfred
-  24: [1, 2, 3, 4, from(4, 18), from(4, 12), 5, 6, from(6, 12), 7, 8, 11, 12, 13], // Karan
-};
+/* ---------------------------------------------------------
+   PICK TRADES — the single source of truth for who owns what.
+   Each entry means: the pick that ORIGINALLY belonged to `from` in that
+   round now belongs to `to`. Both the Teams inventories and the Draft Board
+   derive from this list, so they can never disagree.
 
-// No 2027 trades recorded yet — everyone holds a full slate.
-const PICKS_2027 = {};
+   These were executed in ESPN and then wiped when the roster size changed
+   (ESPN rebuilds the draft board on any roster-settings change), so they
+   live here until they can be safely re-entered. Verified against ESPN's
+   board while the trades were live.
+--------------------------------------------------------- */
+const TRADES_2026 = [
+  { round: 3, from: 18, to: 21 }, // Nick    -> Henry
+  { round: 3, from: 21, to: 5 }, //  Henry   -> Joey
+  { round: 4, from: 1, to: 23 }, //  Kendall -> Alfred
+  { round: 4, from: 12, to: 24 }, // Minh    -> Karan
+  { round: 4, from: 18, to: 24 }, // Nick    -> Karan
+  { round: 5, from: 18, to: 21 }, // Nick    -> Henry
+  { round: 6, from: 1, to: 18 }, //  Kendall -> Nick
+  { round: 6, from: 12, to: 24 }, // Minh    -> Karan
+  { round: 7, from: 5, to: 21 }, //  Joey    -> Henry
+  { round: 7, from: 21, to: 18 }, // Henry   -> Nick
+  { round: 8, from: 18, to: 1 }, //  Nick    -> Kendall
+  { round: 9, from: 24, to: 12 }, // Karan   -> Minh
+  { round: 9, from: 23, to: 1 }, //  Alfred  -> Kendall
+  { round: 10, from: 21, to: 18 }, // Henry  -> Nick
+  { round: 10, from: 24, to: 18 }, // Karan  -> Nick
+  { round: 14, from: 24, to: 12 }, // Karan  -> Minh
+];
 
-const INVENTORIES = { 2026: PICKS_2026, 2027: PICKS_2027 };
+// No 2027 trades yet — add them here in the same shape when they happen.
+const TRADES_2027 = [];
 
-const fullSlate = () => Array.from({ length: DRAFT_ROUNDS }, (_, i) => i + 1);
+const TRADES = { 2026: TRADES_2026, 2027: TRADES_2027 };
+
+const tradesFor = (year) => TRADES[year] ?? [];
+
+/** Who currently owns the pick originally belonging to `originalTeamId`. */
+export function currentOwnerOf(year, round, originalTeamId) {
+  const trade = tradesFor(year).find((t) => t.round === round && t.from === originalTeamId);
+  return trade ? trade.to : originalTeamId;
+}
 
 export function picksFor(espnTeamId, years) {
   return years.flatMap((year) => {
-    const raw = INVENTORIES[year]?.[espnTeamId] ?? fullSlate();
-    return raw.map((entry, i) => {
-      const { round, fromTeamId } = typeof entry === "number" ? { round: entry } : entry;
-      return { id: `pk-${espnTeamId}-${year}-${i}`, year, round, fromTeamId };
+    const trades = tradesFor(year);
+    const rounds = Array.from({ length: DRAFT_ROUNDS }, (_, i) => i + 1);
+
+    const kept = rounds
+      .filter((round) => !trades.some((t) => t.round === round && t.from === espnTeamId))
+      .map((round) => ({ round, fromTeamId: null }));
+
+    const acquired = trades
+      .filter((t) => t.to === espnTeamId)
+      .map((t) => ({ round: t.round, fromTeamId: t.from }));
+
+    return [...kept, ...acquired]
+      .sort((a, b) => a.round - b.round)
+      .map((p, i) => ({ id: `pk-${espnTeamId}-${year}-${i}`, year, ...p }));
+  });
+}
+
+/**
+ * The draft board as rounds x draft-order columns. Snake order, so odd rounds
+ * run left-to-right and even rounds right-to-left; each team keeps its column.
+ */
+export function draftBoard(year) {
+  const size = DRAFT_ORDER.length;
+  return Array.from({ length: DRAFT_ROUNDS }, (_, r) => {
+    const round = r + 1;
+    const cells = DRAFT_ORDER.map((originalTeamId, slot) => {
+      const positionInRound = round % 2 === 1 ? slot + 1 : size - slot;
+      return {
+        round,
+        slot,
+        originalTeamId,
+        currentTeamId: currentOwnerOf(year, round, originalTeamId),
+        overall: (round - 1) * size + positionInRound,
+        label: `${round}.${String(positionInRound).padStart(2, "0")}`,
+      };
     });
+    return { round, cells };
   });
 }
 

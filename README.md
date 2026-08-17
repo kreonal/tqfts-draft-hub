@@ -27,6 +27,9 @@ picked up natively as a serverless function via the `/api` convention.
   2026/2027 pick inventory.
 - **Keepers** — league-wide list of ineligible players (kept in 2025) by
   manager, and confirmed keeper submissions once you record them.
+- **Draft Board** — the full 14-round snake board, columns in draft-order.
+  Traded picks are tinted and labelled "acquired from X", and the Highlight
+  selector dims everything except one manager's picks.
 - **Trade Machine** *(hidden)* — build an N-team trade and check it against
   the bylaws.
 - **Bylaws** *(hidden)* — the plain-English rule reference.
@@ -45,7 +48,7 @@ in the `TABS` array in `src/App.jsx` — nothing else needs to change.
 | `src/lib/leagueData.js` | **Commissioner-managed data — edit this by hand** |
 | `src/lib/rules.js` | Bylaws: keeper eligibility + trade validation |
 | `src/lib/espn.js` | Fetches the league and folds in local data |
-| `src/views/` | `TeamView`, `KeeperView`, `TradeView` |
+| `src/views/` | `TeamView`, `KeeperView`, `DraftBoardView`, `TradeView` |
 | `src/components/ui.jsx` | Shared bits: position tags, keeper badges, pick chips |
 | `src/App.jsx` | Shell, tabs, sync/loading/error states |
 
@@ -74,14 +77,20 @@ those are the players eligible to be kept.
 every team a clean R1–R14 slate and its `futureDraftPicks` array is empty), so
 they live in `src/lib/leagueData.js`:
 
-- `MANAGERS` — real names, since several ESPN accounts use joke handles.
-  A few are still `TODO`; unlisted teams fall back to the ESPN account name.
+- `MANAGERS` — first names, since several ESPN accounts use joke handles.
+  All 16 are mapped; unlisted teams fall back to the ESPN account name.
 - `KEEPER_SLOTS` — per-team slot counts (default 2).
-- `PICKS_2026` / `PICKS_2027` — true pick ownership including traded picks.
-  A bare number is the team's own pick; `from(round, teamId)` marks an
-  acquired one, which the UI renders as e.g. `R8 ←Nick`. Teams not listed
-  hold a full untraded slate. **Traded picks will never sync down from ESPN —
-  this file is the source of truth.**
+- `DRAFT_ORDER` — the 16 ESPN team ids in draft-order.
+- `TRADES_2026` / `TRADES_2027` — every pick trade, as
+  `{ round, from, to }`, meaning the pick originally belonging to `from` in
+  that round now belongs to `to`. Both the Teams inventories and the Draft
+  Board derive from this one list, so they cannot disagree.
+
+  **These do not sync from ESPN, and worse, ESPN loses them.** They were
+  executed in ESPN and then wiped when the roster size changed — ESPN
+  regenerates the draft board from scratch on any roster-settings change,
+  resetting every pick to its original owner. If you re-enter them in ESPN,
+  do not touch roster settings afterwards. This file is the source of truth.
 - `SUBMITTED_KEEPERS` — confirmed keeper declarations, keyed by team id and
   listing ESPN player ids. Currently empty; fill in as owners lock keepers.
 
@@ -119,5 +128,6 @@ Every push to `main` redeploys.
 
 ## Not yet built
 
-- Draft board (waiting on the lottery)
 - Commissioner queue / trade processing workflow
+- Re-entering the 2026 pick trades in ESPN (blocked on 11 teams dropping
+  down to the 14-player roster limit; see the warning above before doing it)
