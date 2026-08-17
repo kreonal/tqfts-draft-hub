@@ -29,21 +29,21 @@ function PickInventory({ team, teamByEspnId }) {
 
 function PlayerRow({ player }) {
   const status = keeperStatus(player);
+  // Kept as a tooltip: the badge shows the cost, this explains where it came from.
+  const drafted =
+    player.draftRound != null
+      ? `Drafted 2025 · Round ${player.draftRound}`
+      : "Undrafted in 2025 — keeper cost is Round 10";
   return (
     <tr className={player.submittedKeeper ? "bg-[#f0f9f2]" : undefined}>
-      <td className="py-2 pl-4 pr-3">
-        <div className="font-semibold text-[13px] text-ink leading-tight">
-          {player.name}
-          {player.submittedKeeper && (
-            <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-good">Keeper</span>
-          )}
-        </div>
-        <div className="text-[11px] text-faint leading-tight">
-          {player.draftRound != null ? `2025 · Round ${player.draftRound}` : "2025 · Undrafted"}
-        </div>
+      <td className="py-1.5 pl-4 pr-3">
+        <span className="font-semibold text-[13px] text-ink">{player.name}</span>
+        {player.submittedKeeper && (
+          <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-good">Keeper</span>
+        )}
       </td>
-      <td className="py-2 pr-3 text-right">
-        <KeeperBadge status={status} />
+      <td className="py-1.5 pr-3 text-right">
+        <KeeperBadge status={status} title={drafted} />
       </td>
     </tr>
   );
@@ -75,7 +75,7 @@ function TeamCard({ team, teamByEspnId }) {
         <thead>
           <tr className="border-b border-hair">
             <th className="label text-left py-1.5 pl-4">2025 Roster</th>
-            <th className="label text-right py-1.5 pr-3">Keeper</th>
+            <th className="label text-right py-1.5 pr-3">Keeper Value</th>
           </tr>
         </thead>
         {groups.map(({ pos, players }) => (

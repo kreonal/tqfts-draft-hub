@@ -26,7 +26,7 @@ export function PositionTag({ pos }) {
 }
 
 /** Keeper cost, or a muted "ineligible" flag. */
-export function KeeperBadge({ status }) {
+export function KeeperBadge({ status, title }) {
   if (!status.eligible) {
     return (
       <span
@@ -38,7 +38,10 @@ export function KeeperBadge({ status }) {
     );
   }
   return (
-    <span className="shrink-0 text-xs font-bold tabular-nums px-2 py-0.5 rounded border border-line bg-white text-ink">
+    <span
+      title={title ?? status.reason}
+      className="shrink-0 text-xs font-bold tabular-nums px-2 py-0.5 rounded border border-line bg-white text-ink"
+    >
       R{status.cost}
     </span>
   );

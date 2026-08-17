@@ -20,17 +20,13 @@ function Table({ entries, tone }) {
           {entries.map(({ player, team, label, fullReason }) => (
             <tr key={player.id} className="border-b border-hair last:border-0 align-middle">
               <td className="py-2 pl-3 pr-2">
-                <div className="font-semibold text-[13px] text-ink leading-tight truncate">{player.name}</div>
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="flex items-center gap-2 min-w-0">
                   <span
                     className="w-2 h-2 rounded-[2px] shrink-0"
                     style={{ background: POSITION_COLORS[player.pos] ?? POSITION_COLORS.FLEX }}
                   />
-                  <span className="text-[11px] text-sub tabular-nums truncate">
-                    {player.pos}
-                    {" · "}
-                    {player.draftRound != null ? `2025 R${player.draftRound}` : "Undrafted"}
-                  </span>
+                  <span className="font-semibold text-[13px] text-ink truncate">{player.name}</span>
+                  <span className="text-[11px] text-faint shrink-0">{player.pos}</span>
                 </div>
               </td>
               <td className="py-2 pr-2 text-[12px] text-ink truncate">{team.manager}</td>
