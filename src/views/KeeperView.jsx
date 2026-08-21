@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { keeperStatus } from "../lib/rules";
+import { ineligibleKeepers } from "../lib/leagueData";
 import { POSITION_COLORS } from "../components/ui";
 
 function Table({ entries, tone }) {
@@ -71,18 +72,25 @@ export default function KeeperView({ teams }) {
   const [query, setQuery] = useState("");
 
   const { ineligible, submitted } = useMemo(() => {
-    const ineligible = [];
+    // Ineligible comes from the fixed list, not live rosters, so players stay
+    // listed after they're dropped — being kept in 2025 doesn't stop being true.
+    const ineligible = ineligibleKeepers().map((p) => ({
+      player: { id: `inel-${p.name}`, name: p.name, pos: p.pos },
+      team: { manager: p.manager },
+      label: "Kept in 2025",
+      fullReason: "Kept in 2025 — no back-to-back keeps",
+    }));
+
     const submitted = [];
     teams.forEach((team) => {
       team.roster.forEach((player) => {
         const status = keeperStatus(player);
-        if (!status.eligible) {
-          ineligible.push({ player, team, label: status.short, fullReason: status.reason });
-        } else if (player.submittedKeeper) {
+        if (status.eligible && player.submittedKeeper) {
           submitted.push({ player, team, label: `Round ${status.cost}`, fullReason: status.reason });
         }
       });
     });
+
     const sort = (a, b) =>
       a.team.manager.localeCompare(b.team.manager) || a.player.name.localeCompare(b.player.name);
     return { ineligible: ineligible.sort(sort), submitted: submitted.sort(sort) };

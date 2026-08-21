@@ -26,9 +26,10 @@ picked up natively as a serverless function via the `/api` convention.
   ineligible players flagged, plus keeper slots, FAAB, and the full
   2026/2027 pick inventory.
 - **Keepers** — league-wide list of ineligible players (kept in 2025) by
-  manager, and confirmed keeper submissions once you record them.
+  manager, plus the keepers owners have declared for 2026.
 - **Draft Board** — the full 14-round snake board, columns in draft-order.
-  Traded picks are tinted and labelled "acquired from X".
+  Traded picks are tinted red and labelled "acquired from X"; slots spent on
+  a declared keeper are tinted green and show the player.
 - **Trade Machine** *(hidden)* — build an N-team trade and check it against
   the bylaws.
 - **Bylaws** *(hidden)* — the plain-English rule reference.
@@ -90,8 +91,15 @@ they live in `src/lib/leagueData.js`:
   regenerates the draft board from scratch on any roster-settings change,
   resetting every pick to its original owner. If you re-enter them in ESPN,
   do not touch roster settings afterwards. This file is the source of truth.
-- `SUBMITTED_KEEPERS` — confirmed keeper declarations, keyed by team id and
-  listing ESPN player ids. Currently empty; fill in as owners lock keepers.
+- `SUBMITTED_KEEPERS` — declared keepers, keyed by team id, each with the
+  ESPN player id and the draft slot (`round`/`pick`) it consumes. That slot
+  is what places the keeper on the Draft Board. ESPN only exposes keepers
+  once the draft has actually run, not while they are merely declared, so
+  these are transcribed by hand from ESPN's League Keepers page.
+- `INELIGIBLE_2026` — everyone kept in 2025, so they can't be kept again.
+  Held as a fixed list rather than derived from rosters: being kept in 2025
+  is permanent for this offseason, but rosters are live, so deriving it made
+  players disappear the moment someone dropped them.
 
 ## Bylaws encoded
 

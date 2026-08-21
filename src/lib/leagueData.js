@@ -150,6 +150,7 @@ export function draftBoard(year) {
       return {
         round,
         slot,
+        pickInRound: positionInRound,
         originalTeamId,
         currentTeamId: currentOwnerOf(year, round, originalTeamId),
         overall: (round - 1) * size + positionInRound,
@@ -161,13 +162,86 @@ export function draftBoard(year) {
 }
 
 /* ---------------------------------------------------------
-   SUBMITTED KEEPERS — players formally declared as keepers for 2026.
-   Keyed by ESPN team id, listing ESPN player ids. Add entries as owners
-   confirm their keepers; the Keepers screen reads straight from this.
-     18: [3117251, 4426348],
+   SUBMITTED KEEPERS — players declared as keepers for the 2026 draft,
+   keyed by ESPN team id. `round`/`pick` are the draft slot the keeper
+   consumes, which is what puts them on the Draft Board.
+
+   Transcribed from ESPN's League Keepers page (keeper lock: Aug 28 2026).
+   ESPN does expose this once the draft runs, but not while keepers are
+   merely declared, so it lives here for now.
 --------------------------------------------------------- */
-const SUBMITTED_KEEPERS = {};
+const SUBMITTED_KEEPERS = {
+  1: [{ playerId: 4429160, round: 1, pick: 16 }], // Kendall — De'Von Achane
+  2: [{ playerId: 4431459, round: 7, pick: 8 }], //  Matt    — Tyler Warren
+  8: [
+    { playerId: 4374302, round: 1, pick: 12 }, //     Rohan   — Amon-Ra St. Brown
+    { playerId: 4430878, round: 2, pick: 5 }, //      Rohan   — Jaxon Smith-Njigba
+  ],
+  19: [
+    { playerId: 4723086, round: 9, pick: 9 }, //      Calvin  — Colston Loveland
+    { playerId: 4360761, round: 13, pick: 9 }, //     Calvin  — Michael Wilson
+  ],
+  21: [
+    { playerId: 4429795, round: 1, pick: 13 }, //     Henry   — Jahmyr Gibbs
+    { playerId: 4685702, round: 8, pick: 4 }, //      Henry   — Quinshon Judkins
+    // Both cost R5: Egbuka takes Henry's own R5, Olave the R5 from Nick.
+    { playerId: 4567750, round: 5, pick: 13 }, //     Henry   — Emeka Egbuka
+    { playerId: 4361370, round: 5, pick: 11 }, //     Henry   — Chris Olave
+  ],
+  22: [{ playerId: 4429025, round: 13, pick: 7 }], // Zack    — Quentin Johnston
+};
 
 export function submittedKeeperIdsFor(espnTeamId) {
-  return SUBMITTED_KEEPERS[espnTeamId] ?? [];
+  return (SUBMITTED_KEEPERS[espnTeamId] ?? []).map((k) => k.playerId);
+}
+
+/* ---------------------------------------------------------
+   INELIGIBLE PLAYERS — kept in 2025, so they can't be kept back-to-back.
+
+   Held as a fixed list rather than derived from current rosters: being kept
+   in 2025 is a permanent fact for this offseason, but rosters are live, so
+   deriving it meant players silently vanished from the list the moment
+   someone dropped them. `manager` is who kept them in 2025.
+--------------------------------------------------------- */
+const INELIGIBLE_2026 = [
+  { name: "Jameson Williams", pos: "WR", manager: "Aaron" },
+  { name: "Malik Nabers", pos: "WR", manager: "Aaron" },
+  { name: "Isaiah Likely", pos: "TE", manager: "Alfred" },
+  { name: "George Kittle", pos: "TE", manager: "Anthony" },
+  { name: "Jakobi Meyers", pos: "WR", manager: "Anthony" },
+  { name: "Derrick Henry", pos: "RB", manager: "Calvin" },
+  { name: "Josh Allen", pos: "QB", manager: "Joey" },
+  { name: "Drake London", pos: "WR", manager: "John" },
+  { name: "Xavier Worthy", pos: "WR", manager: "John" },
+  { name: "Brock Bowers", pos: "TE", manager: "Kendall" },
+  { name: "Bucky Irving", pos: "RB", manager: "Kendall" },
+  { name: "CeeDee Lamb", pos: "WR", manager: "Kendall" },
+  { name: "Ja'Marr Chase", pos: "WR", manager: "Kendall" },
+  { name: "Jayden Daniels", pos: "QB", manager: "Kendall" },
+  { name: "Alvin Kamara", pos: "RB", manager: "Matt" },
+  { name: "Justin Jefferson", pos: "WR", manager: "Matt" },
+  { name: "Joe Burrow", pos: "QB", manager: "Nick" },
+  { name: "Josh Jacobs", pos: "RB", manager: "Nick" },
+  { name: "Tee Higgins", pos: "WR", manager: "Nick" },
+  { name: "Aaron Jones Sr.", pos: "RB", manager: "Prashant" },
+  { name: "Brian Thomas Jr.", pos: "WR", manager: "Prashant" },
+  { name: "Justin Herbert", pos: "QB", manager: "Prashant" },
+  { name: "Tony Pollard", pos: "RB", manager: "Rohan" },
+  { name: "Zach Charbonnet", pos: "RB", manager: "Rohan" },
+  { name: "Ladd McConkey", pos: "WR", manager: "Shaun" },
+  { name: "Saquon Barkley", pos: "RB", manager: "Shaun" },
+  { name: "Lamar Jackson", pos: "QB", manager: "Zack" },
+];
+
+export function ineligibleKeepers() {
+  return INELIGIBLE_2026;
+}
+
+/** Keepers indexed by the draft slot they occupy, for the Draft Board. */
+export function keepersBySlot() {
+  const map = new Map();
+  Object.entries(SUBMITTED_KEEPERS).forEach(([teamId, keepers]) => {
+    keepers.forEach((k) => map.set(`${k.round}.${k.pick}`, { ...k, espnTeamId: Number(teamId) }));
+  });
+  return map;
 }
